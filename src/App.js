@@ -1,28 +1,71 @@
-import React, { useRef, useState } from "react";
+import React, { Suspense, useRef } from "react";
 import ReactDOM from "react-dom";
+import "./index.css";
+import Model from "./Bomb";
+import * as THREE from "three";
+import { Html, Loader, Environment } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 
-function Box(props) {
-  // This reference will give us direct access to the mesh
-  const mesh = useRef();
-  // Set up state for the hovered and active state
-  const [hovered, setHover] = useState(false);
-  const [active, setActive] = useState(false);
-  // Rotate mesh every frame, this is outside of React without overhead
-  useFrame(() => (mesh.current.rotation.x += 0.01));
-
+export function Rig({ children }) {
+  const outer = useRef();
+  const inner = useRef();
+  useFrame(({ clock }) => {
+    outer.current.position.y = THREE.MathUtils.lerp(
+      outer.current.position.y,
+      0,
+      0.05
+    );
+    inner.current.rotation.y = Math.sin(clock.getElapsedTime() / 8) * Math.PI;
+    inner.current.position.z = 5 + -Math.sin(clock.getElapsedTime() / 2) * 10;
+    inner.current.position.y = -5 + Math.sin(clock.getElapsedTime() / 2) * 2;
+  });
   return (
-    <mesh
-      {...props}
-      ref={mesh}
-      scale={active ? 1.5 : 1}
-      onClick={(event) => setActive(!active)}
-      onPointerOver={(event) => setHover(true)}
-      onPointerOut={(event) => setHover(false)}
-    >
-      <boxGeometry args={[1, 2, 3]} />
-      <meshStandardMaterial color={hovered ? "hotpink" : "orange"} />
-    </mesh>
+    <group position={[0, -100, 0]} ref={outer}>
+      <group ref={inner}>{children}</group>
+    </group>
   );
 }
-export default Box;
+
+export function BombModel() {
+  return (
+    <Canvas
+      concurrent
+      gl={{ alpha: false }}
+      camera={{ position: [0, 15, 30], fov: 10 }}
+      onCreated={({ gl, camera }) => {
+        camera.lookAt(0, 0, 0);
+      }}
+    >
+      <color attach="background" args={["#fff0ea"]} />
+      {/* <fog attach="fog" args={["#fff0ea", 10, 60]} /> */}
+      <ambientLight intensity={0.1} />
+
+      <Suspense
+        fallback={
+          <Html center>
+            <Loader />
+          </Html>
+        }
+      >
+        {/* <Rig> */}
+        <Model />
+        <Environment preset="sunset" background />
+        <mesh
+          scale={[100, 100, 1]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          onPointerOver={(e) => e.stopPropagation()}
+        >
+          <planeBufferGeometry attach="geometry" />
+          <meshBasicMaterial
+            attach="material"
+            transparent
+            opacity={0.7}
+            color="skyblue"
+          />
+        </mesh>
+        {/* </Rig> */}
+      </Suspense>
+    </Canvas>
+  );
+}
+export default BombModel;
