@@ -3,7 +3,13 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import Model from "./Bomb";
 import * as THREE from "three";
-import { Html, Loader, Environment } from "@react-three/drei";
+import {
+  Html,
+  Loader,
+  Environment,
+  TrackballControls,
+  OrbitControls,
+} from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 
 export function Rig({ children }) {
@@ -50,6 +56,8 @@ export function BombModel() {
         {/* <Rig> */}
         <Model />
         <Environment preset="sunset" background />
+        <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
+
         <mesh
           scale={[100, 100, 1]}
           rotation={[-Math.PI / 2, 0, 0]}
