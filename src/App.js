@@ -7,8 +7,8 @@ import {
   Html,
   Loader,
   Environment,
-  TrackballControls,
   OrbitControls,
+  FlyControls,
 } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 
@@ -33,11 +33,17 @@ export function Rig({ children }) {
 }
 
 export function BombModel() {
+  const keyMap = {
+    LEFT: "a",
+    UP: "w",
+    RIGHT: "d",
+    BOTTOM: "s",
+  };
   return (
     <Canvas
       concurrent
       gl={{ alpha: false }}
-      camera={{ position: [0, 15, 30], fov: 10 }}
+      camera={{ position: [0, 15, 30], fov: 30 }}
       onCreated={({ gl, camera }) => {
         camera.lookAt(0, 0, 0);
       }}
@@ -55,22 +61,19 @@ export function BombModel() {
       >
         {/* <Rig> */}
         <Model />
-        <Environment preset="sunset" background />
-        <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
-
+        <Environment preset="sunset" />
+        <OrbitControls
+          enablePan={true}
+          enableZoom={true}
+          enableRotate={true}
+          keys={keyMap}
+        />
+        <FlyControls />
         <mesh
-          scale={[100, 100, 1]}
+          scale={[1, 1, 1]}
           rotation={[-Math.PI / 2, 0, 0]}
           onPointerOver={(e) => e.stopPropagation()}
-        >
-          <planeBufferGeometry attach="geometry" />
-          <meshBasicMaterial
-            attach="material"
-            transparent
-            opacity={0.7}
-            color="skyblue"
-          />
-        </mesh>
+        ></mesh>
         {/* </Rig> */}
       </Suspense>
     </Canvas>
